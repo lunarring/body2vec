@@ -9,7 +9,9 @@ def uniform_slerp(vectors, alpha):
 
     alpha_normalized = (alpha - index * segment_size) / segment_size
 
-    # print(f"{alpha} indices are {index} and {(index + 1) % n}")
+    alpha_normalized = 1 - alpha_normalized
+    print(f"{alpha} indices are {index} and {(index + 1) % n}")
+    print(f"alpha normalized: {alpha_normalized}")
 
     v0 = vectors[index]
     v1 = vectors[(index + 1) % n]

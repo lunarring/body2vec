@@ -85,14 +85,15 @@ class Modulator:
         self,
         categorie: str,
         alpha: float,
+        decay: float,
     ):
         categorie_idx, slerped_1, slerped_2 = self.get_idx_embeddings(
             categorie,
             alpha,
         )
-        
-        self.text_encoder_1.text_model.embeddings.token_embedding.weight.data[categorie_idx] = slerped_1
-        self.text_encoder_2.text_model.embeddings.token_embedding.weight.data[categorie_idx] = slerped_2
+
+        self.text_encoder_1.text_model.embeddings.token_embedding.weight.data[categorie_idx] = (1-decay) * slerped_1 + decay * self.text_encoder_1.text_model.embeddings.token_embedding.weight.data[categorie_idx]
+        self.text_encoder_2.text_model.embeddings.token_embedding.weight.data[categorie_idx] = (1-decay) * slerped_2 + decay * self.text_encoder_2.text_model.embeddings.token_embedding.weight.data[categorie_idx]
 
 if __name__=="__main__":
 
