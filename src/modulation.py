@@ -7,7 +7,7 @@ from transformers import (
     AutoTokenizer,
     CLIPVisionModelWithProjection,
 )
-from interpolation import uniform_slerp
+from src.interpolation import uniform_slerp
 import time
 
 categories = {
@@ -17,7 +17,7 @@ categories = {
 
 structure = "an antropomorphic color animal"
 
-class Interpolator:
+class Modulator:
     def __init__(
         self,
         categories,
@@ -27,6 +27,10 @@ class Interpolator:
     ):
         self.category_idxs = {}
         self.categories = {}
+
+        self.text_encoder_1 = text_encoder_1
+        self.text_encoder_2 = text_encoder_2
+
         for category, category_values in categories.items():
             embeddings_1 = []
             embeddings_2 = []
@@ -77,6 +81,19 @@ class Interpolator:
 
         return categorie_idx, slerped_1, slerped_2
 
+    def set_idx_embeddings(
+        self,
+        categorie: str,
+        alpha: float,
+    ):
+        categorie_idx, slerped_1, slerped_2 = self.get_idx_embeddings(
+            categorie,
+            alpha,
+        )
+        
+        self.text_encoder_1.text_model.embeddings.token_embedding.weight.data[categorie_idx] = slerped_1
+        self.text_encoder_2.text_model.embeddings.token_embedding.weight.data[categorie_idx] = slerped_2
+
 if __name__=="__main__":
 
     tokenizer = AutoTokenizer.from_pretrained(
@@ -92,14 +109,14 @@ if __name__=="__main__":
         subfolder="text_encoder_2",
     )
 
-    interpolator = Interpolator(
+    modulator = Modulator(
         categories,
         tokenizer,
         text_encoder,
         text_encoder_2,
     )
 
-    idx_to_override, embedding_1, embedding_2 = interpolator.get_idx_embeddings("color", 0.5)
+    idx_to_override, embedding_1, embedding_2 = modulator.get_idx_embeddings("color", 0.5)
     print(f"overriding {idx_to_override}")
 
     # override the idx embeddings
